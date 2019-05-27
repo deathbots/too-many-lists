@@ -39,6 +39,17 @@ impl List {
     }
 }
 
+impl Drop for List {
+    fn drop(&mut self) {
+        let mut cur_link = mem::replace(&mut self.head, Link::Empty);
+        // while let == do this thing until this pattern doesn't match
+        while let Link::More(mut boxed_node) = cur_link {
+            cur_link = mem::replace(&mut boxed_node.next, Link::Empty);
+            // boxed_node will now go out of scope and be dropped
+            // and the next is now Empty, so it won't recurse forever
+        }
+    }
+}
 
 #[cfg(test)]
 mod test {
